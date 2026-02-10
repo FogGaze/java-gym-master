@@ -1,7 +1,6 @@
 package ru.yandex.practicum.gym;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class Timetable {
 
