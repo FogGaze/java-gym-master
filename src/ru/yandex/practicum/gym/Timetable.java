@@ -1,10 +1,13 @@
 package ru.yandex.practicum.gym;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class Timetable {
 
     private HashMap<DayOfWeek, TreeMap<TimeOfDay, List<TrainingSession>>> timetable = new HashMap<>();
+
+    private HashMap<Coach, Integer> coachesCounter = new HashMap<>();
 
     public void addNewTrainingSession(TrainingSession trainingSession) {
         if (!timetable.containsKey(trainingSession.getDayOfWeek())) {
@@ -19,20 +22,20 @@ public class Timetable {
 
         List<TrainingSession> sessionsAtTime = dayTimetable.get(trainingSession.getTimeOfDay());
 
-        if (sessionsAtTime.contains(trainingSession)) {
-            System.out.println("Занятие уже есть в расписании");
-        } else {
+        if (!sessionsAtTime.contains(trainingSession)) {
             sessionsAtTime.add(trainingSession);
+
+            Coach coach = trainingSession.getCoach();
+            coachesCounter.put(coach, coachesCounter.getOrDefault(coach, 0) + 1);
         }
     }
 
     public TreeMap<TimeOfDay, List<TrainingSession>> getTrainingSessionsForDay(DayOfWeek dayOfWeek) {
-        if (timetable.containsKey(dayOfWeek)) {
-            return timetable.get(dayOfWeek);
-        } else {
-            System.out.println("Занятий в " + dayOfWeek + " нет");
-            return null;
+        TreeMap<TimeOfDay, List<TrainingSession>> trainingsForDay = timetable.get(dayOfWeek);
+        if (trainingsForDay == null) {
+            return new TreeMap<>();
         }
+        return trainingsForDay;
     }
 
     public List<TrainingSession> getTrainingSessionsForDayAndTime(DayOfWeek dayOfWeek, TimeOfDay timeOfDay) {
@@ -42,14 +45,10 @@ public class Timetable {
             List<TrainingSession> sessionsAtTime = dayTimetable.get(timeOfDay);
             if (sessionsAtTime != null) {
                 return sessionsAtTime;
-            } else {
-                System.out.println("Занятий в " + timeOfDay + " нет");
-                return null;
             }
-        } else {
-            System.out.println("Занятий в " + dayOfWeek + " нет");
-            return null;
+            return new ArrayList<>();
         }
+        return new ArrayList<>();
     }
 
     public HashMap<DayOfWeek, TreeMap<TimeOfDay, List<TrainingSession>>> getTimetable() {
@@ -57,33 +56,18 @@ public class Timetable {
     }
 
     public HashMap<Coach, Integer> getCountByCoaches() {
-        //Создаём таблицу тренеров с количеством тренировок
-        HashMap<Coach, Integer> coachesCount = new HashMap<>();
-        //Перебираем дни
-        for (Map.Entry<DayOfWeek, TreeMap<TimeOfDay, List<TrainingSession>>> entry : timetable.entrySet()) {
-            TreeMap<TimeOfDay, List<TrainingSession>> sessionsForDay = entry.getValue();
-            //перебираем время
-            for (Map.Entry<TimeOfDay, List<TrainingSession>> timeEntry : sessionsForDay.entrySet()) {
-                List<TrainingSession> sessions = timeEntry.getValue();
-                //перебираем занятия
-                for (TrainingSession session : sessions) {
-                    //считаем уникальных тренеров и их тренировки
-                    //добавляем нового тренера на этом занятии, либо добавляем 1 в значение к уже существующему
-                    coachesCount.merge(session.getCoach(), 1, Integer::sum);
-                }
-            }
-        }
-        return coachesCount;
+        //Возвращаем таблицу тренеров с количеством тренировок
+        return coachesCounter;
     }
 
     public List<Map.Entry<Coach, Integer>> getCountByCoachesSorted() {
-        HashMap<Coach, Integer> coachesCount = getCountByCoaches();
-        return coachesCount.entrySet().stream()
-                .sorted(Map.Entry.comparingByValue((a, b) -> b.compareTo(a)))
-                .toList();
+        return coachesCounter.entrySet().stream()
+                .sorted(Map.Entry.<Coach, Integer>comparingByValue().reversed())
+                .collect(Collectors.toList());
     }
 
-    public List<String> formatCountByCoaches(List<Map.Entry<Coach, Integer>> sortedCoaches) {
+    public List<String> formatCountByCoaches() {
+        List<Map.Entry<Coach, Integer>> sortedCoaches = getCountByCoachesSorted();
         List<String> result = new ArrayList<>();
         for (Map.Entry<Coach, Integer> entry : sortedCoaches) {
             String coachName = entry.getKey().getFullName();

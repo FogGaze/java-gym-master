@@ -22,8 +22,9 @@ public class TimetableTest {
         TreeMap<TimeOfDay, List<TrainingSession>> mondaySessions = timetable.getTrainingSessionsForDay(DayOfWeek.MONDAY);
         Assertions.assertEquals(1, mondaySessions.size());
 
-        //Проверить, что за вторник не вернулось занятий
-        Assertions.assertNull(timetable.getTrainingSessionsForDay(DayOfWeek.TUESDAY));
+        //Проверить, что за вторник вернулась пустая TreeMap
+        TreeMap<TimeOfDay, List<TrainingSession>> tuesdaySessions = timetable.getTrainingSessionsForDay(DayOfWeek.TUESDAY);
+        Assertions.assertEquals(0, tuesdaySessions.size());
 
         //Вывод в консоль расписания
         timetable.printTimeTable();
@@ -63,8 +64,9 @@ public class TimetableTest {
         Assertions.assertEquals(0, thursdaySessions.firstEntry().getKey().compareTo(thursdayChildTrainingSession.getTimeOfDay()));
         Assertions.assertEquals(0, thursdaySessions.lastEntry().getKey().compareTo(thursdayAdultTrainingSession.getTimeOfDay()));
 
-        // Проверить, что за вторник не вернулось занятий
-        Assertions.assertNull(timetable.getTrainingSessionsForDay(DayOfWeek.TUESDAY));
+        // Проверить, что за вторник вернулась пустая TreeMap
+        TreeMap<TimeOfDay, List<TrainingSession>> tuesdaySessions = timetable.getTrainingSessionsForDay(DayOfWeek.TUESDAY);
+        Assertions.assertEquals(0, tuesdaySessions.size());
 
         //Вывод в консоль расписания
         timetable.printTimeTable();
@@ -87,7 +89,7 @@ public class TimetableTest {
 
         //Проверить, что за понедельник в 14:00 не вернулось занятий
         List<TrainingSession> noSessions = timetable.getTrainingSessionsForDayAndTime(DayOfWeek.MONDAY, new TimeOfDay(14, 0));
-        Assertions.assertNull(noSessions);
+        Assertions.assertEquals(0, noSessions.size());
 
         //Вывод в консоль расписания
         timetable.printTimeTable();
@@ -121,7 +123,7 @@ public class TimetableTest {
         Group groupAdult = new Group("Акробатика для взрослых", Age.ADULT, 60);
         Coach coachOne = new Coach("Васильев", "Николай", "Сергеевич");
         Coach coachTwo = new Coach("Петров", "Василий", "Сергеевич");
-        TimeOfDay timeSession = new TimeOfDay(13,0);
+        TimeOfDay timeSession = new TimeOfDay(13, 0);
 
         TrainingSession trainingSessionChildOne = new TrainingSession(group, coachOne,
                 DayOfWeek.MONDAY, timeSession);
@@ -217,7 +219,7 @@ public class TimetableTest {
             Assertions.assertTrue(current.getValue() >= next.getValue());
         }
         //Выводим в консоль список тренеров и количество тренировок
-        System.out.println(timetable.formatCountByCoaches(timetable.getCountByCoachesSorted()));
+        System.out.println(timetable.formatCountByCoaches());
 
         //Вывод в консоль расписания
         timetable.printTimeTable();
