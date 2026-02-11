@@ -41,4 +41,8 @@ public class Coach {
     public String getMiddleName() {
         return middleName;
     }
+
+    public String getFullName() {
+        return surname + " " + middleName + " " + name;
+    }
 }
